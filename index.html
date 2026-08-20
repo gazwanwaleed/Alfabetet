@@ -3,28 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Forma bokstäver</title>
+  <title>Träna på bokstäver</title>
   <style>
     * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
-    body { margin: 0; padding: 10px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; gap: 8px; }
     
-    h1 { color: #2c3e50; margin: 0; font-size: 1.5rem; text-align: center; }
+    body {
+      margin: 0;
+      padding: 10px;
+      background-color: #f0f8ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 1.5vh;
+      overflow: hidden;
+    }
     
-    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 680px; }
-    .letter-btn, .fs-btn { width: 36px; height: 36px; font-size: 1.05rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-    .letter-btn.active { background-color: #3498db; color: white; }
-    .fs-btn { border-color: #2c3e50; background-color: #fff; }
-    .fs-btn img { width: 22px; height: 22px; object-fit: contain; display: block; }
+    h1 {
+      color: #2c3e50;
+      margin: 0;
+      font-size: 3vh;
+      text-align: center;
+    }
     
-    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; width: 100%; max-width: 580px; aspect-ratio: 2 / 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    canvas { display: block; width: 100%; height: 100%; border-radius: 9px; }
+    .alphabet-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      max-width: 90vw;
+    }
+
+    .letter-btn, .fs-btn {
+      width: 4.2vh;
+      height: 4.2vh;
+      min-width: 32px;
+      min-height: 32px;
+      font-size: 2vh;
+      font-weight: bold;
+      background-color: #fff;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      color: #2c3e50;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .letter-btn.active {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .fs-btn {
+      border-color: #2c3e50;
+      background-color: #fff;
+    }
+
+    .fs-btn img {
+      width: 2.2vh;
+      height: 2.2vh;
+      object-fit: contain;
+      display: block;
+    }
     
-    .controls { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
-    .btn { padding: 8px 14px; font-size: 1.05rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+    .canvas-container {
+      position: relative;
+      background: white;
+      border: 3px solid #2c3e50;
+      border-radius: 12px;
+      width: 65vw;
+      max-width: 700px;
+      aspect-ratio: 2 / 1;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 9px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1vw;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 1vh 1.5vw;
+      font-size: 2vh;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     
     .btn img {
-      width: 26px;
-      height: 26px;
+      width: 3vh;
+      height: 3vh;
       object-fit: contain;
       display: block;
     }
@@ -34,8 +121,61 @@
     .next-btn { background-color: #2ecc71; }
     .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
     
-    .speed-control { display: flex; align-items: center; gap: 4px; background-color: white; border: 2px solid #bdc3c7; border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; color: #2c3e50; }
-    .speed-control input[type=range] { width: 65px; cursor: pointer; }
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5vw;
+      background-color: white;
+      border: 2px solid #bdc3c7;
+      border-radius: 8px;
+      padding: 0.5vh 1vw;
+      font-size: 1.8vh;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .speed-control input[type=range] {
+      width: 8vw;
+      min-width: 60px;
+      cursor: pointer;
+    }
+
+    /* AUTOMATISK HELSKÄRMS-ANPASSNING FÖR ALLA ENHETER */
+    body:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      padding: 2vh 2vw;
+      gap: 2vh;
+    }
+
+    body:fullscreen .canvas-container {
+      width: 75vw;
+      max-width: 900px;
+    }
+
+    body:fullscreen h1 {
+      font-size: 4vh;
+    }
+
+    body:fullscreen .letter-btn, body:fullscreen .fs-btn {
+      width: 5.2vh;
+      height: 5.2vh;
+      font-size: 2.5vh;
+    }
+
+    body:fullscreen .fs-btn img {
+      width: 2.8vh;
+      height: 2.8vh;
+    }
+
+    body:fullscreen .btn {
+      font-size: 2.3vh;
+    }
+
+    body:fullscreen .btn img {
+      width: 3.5vh;
+      height: 3.5vh;
+    }
   </style>
 </head>
 <body>
@@ -139,7 +279,6 @@
       grid.appendChild(btn);
     });
 
-    // Skapa och lägg till helskärmsknappen efter bokstaven Ö i rutnätet
     const fsBtn = document.createElement('button');
     fsBtn.className = 'fs-btn';
     fsBtn.title = 'Helskärm';
