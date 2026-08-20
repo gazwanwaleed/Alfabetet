@@ -7,6 +7,14 @@
   <style>
     * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
     body { margin: 0; padding: 10px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: space-between; }
+    
+    /* Anpassning när hela sidan är i helskärm */
+    :fullscreen body, :-webkit-full-screen body {
+      background-color: #f0f8ff;
+      justify-content: center;
+      gap: 15px;
+    }
+
     h1 { color: #2c3e50; margin: 5px 0; font-size: 1.6rem; text-align: center; }
     
     .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 700px; margin-bottom: 10px; }
@@ -55,7 +63,6 @@
 
     const grid = document.getElementById('alphabetGrid');
     const canvas = document.getElementById('paintCanvas');
-    const canvasContainer = document.getElementById('canvasContainer');
     const ctx = canvas.getContext('2d');
     const clearBtn = document.getElementById('clearBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -282,7 +289,6 @@
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      // Beräkna koordinater baserat på den faktiska skalan på canvasen
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
       return { 
@@ -319,10 +325,10 @@
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
     canvas.addEventListener('touchend', stopDrawing);
 
-    // Helskärmsfunktion
+    // Helskärmsfunktion för hela dokumentet
     fsBtn.addEventListener('click', () => {
       if (!document.fullscreenElement) {
-        canvasContainer.requestFullscreen().catch(err => {
+        document.documentElement.requestFullscreen().catch(err => {
           alert(`Kunde inte aktivera helskärm: ${err.message}`);
         });
       } else {
