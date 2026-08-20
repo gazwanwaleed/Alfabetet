@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Träna på bokstäver</title>
+  <style>
+    * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
+    body { margin: 0; padding: 15px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; }
+    h1 { color: #2c3e50; margin: 0 0 10px 0; font-size: 1.8rem; }
+    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 800px; margin-bottom: 15px; }
+    .letter-btn { width: 42px; height: 42px; font-size: 1.2rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .letter-btn.active { background-color: #3498db; color: white; }
+    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; margin-bottom: 15px; }
+    canvas { display: block; border-radius: 9px; }
+    .controls { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 10px 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+    .demo-btn { background-color: #9b59b6; }
+    .clear-btn { background-color: #e74c3c; }
+    .next-btn { background-color: #2ecc71; font-size: 1rem; }
+    .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    
+    .speed-control { display: flex; align-items: center; gap: 6px; background-color: white; border: 2px solid #bdc3c7; border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; font-weight: bold; color: #2c3e50; }
+    .speed-control input[type=range] { width: 80px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>Forma bokstäver</h1>
+  <div class="alphabet-grid" id="alphabetGrid"></div>
+  <div class="canvas-container">
+    <canvas id="paintCanvas" width="600" height="300"></canvas>
+  </div>
+  <div class="controls">
+    <button class="btn demo-btn" id="demoBtn" title="Visa hur man ritar">👁️</button>
+    <div class="speed-control">
+      <span>🐢</span>
+      <input type="range" id="speedSlider" min="0.5" max="5" step="0.5" value="2">
+      <span>🐇</span>
+    </div>
+    <button class="btn clear-btn" id="clearBtn" title="Rensa">🗑️</button>
+    <button class="btn next-btn" id="nextBtn">Nästa bokstav ➔</button>
+  </div>
+
+  <script>
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ'.split('');
+    let currentLetterIndex = 0;
+
+    const grid = document.getElementById('alphabetGrid');
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    const clearBtn = document.getElementById('clearBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const demoBtn = document.getElementById('demoBtn');
+    const speedSlider = document.getElementById('speedSlider');
+
+    let isDrawing = false;
+    let isAnimating = false;
+    let animationFrameId = null;
+
+    function createCirclePath(cx, cy, r, numPoints = 24) {
+      const points = [];
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
+        points.push({
+          x: cx + r * Math.cos(angle),
+          y: cy + r * Math.sin(angle)
+        });
+      }
+      return points;
+    }
+
+    function createSmallAPath(cx, cy, rx, ry) {
+      const points = [];
+      const numPoints = 20;
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = -Math.PI * 0.3 - (i / numPoints) * Math.PI * 1.8;
+        points.push({
+          x: cx + rx * Math.cos(angle),
+          y: cy + ry * Math.sin(angle)
+        });
+      }
+      return points;
+    }
+
+    const strokeGuide = {
+      'A': [
+        [{x:220,y:115},{x:168,y:230}],
+        [{x:220,y:115},{x:272,y:230}],
+        [{x:186,y:190},{x:254,y:190}],
+        createSmallAPath(398, 192, 23, 30),
+        [{x:421,y:155},{x:421,y:230}]
+      ],
+      'B': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:225,y:115},{x:240,y:140},{x:225,y:165},{x:175,y:165}],[{x:175,y:165},{x:230,y:165},{x:245,y:195},{x:230,y:230},{x:175,y:230}],[{x:375,y:115},{x:375,y:230}],[{x:375,y:165},{x:415,y:165},{x:425,y:195},{x:415,y:230},{x:375,y:230}]],
+      'C': [
+        [{x:250,y:135},{x:225,y:118},{x:192,y:128},{x:170,y:172},{x:192,y:216},{x:225,y:226},{x:250,y:210}],
+        [{x:420,y:175},{x:405,y:160},{x:385,y:168},{x:375,y:192},{x:385,y:218},{x:405,y:225},{x:420,y:210}]
+      ],
+      'D': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:255,y:172},{x:235,y:230},{x:175,y:230}],[{x:422,y:115},{x:422,y:230}],[{x:422,y:160},{x:395,y:155},{x:375,y:175},{x:375,y:205},{x:395,y:230},{x:422,y:220}]],
+      'E': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],[{x:175,y:230},{x:245,y:230}],[{x:375,y:192},{x:420,y:192},{x:420,y:170},{x:398,y:155},{x:375,y:175},{x:375,y:208},{x:400,y:230},{x:425,y:215}]],
+      'F': [
+        [{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],
+        [{x:380,y:230},{x:380,y:135},{x:395,y:115},{x:420,y:125}],
+        [{x:365,y:172},{x:405,y:172}]
+      ],
+      'G': [
+        [{x:250,y:135},{x:215,y:115},{x:180,y:135},{x:165,y:172},{x:180,y:210},{x:215,y:230},{x:250,y:215},{x:250,y:172},{x:215,y:172}],
+        [{x:420,y:165},{x:398,y:155},{x:375,y:175},{x:375,y:208},{x:398,y:228},{x:420,y:215}],
+        [{x:420,y:155},{x:420,y:250},{x:405,y:268},{x:380,y:260}]
+      ],
+      'H': [[{x:175,y:115},{x:175,y:230}],[{x:250,y:115},{x:250,y:230}],[{x:175,y:172},{x:250,y:172}],[{x:375,y:115},{x:375,y:230}],[{x:375,y:175},{x:400,y:160},{x:420,y:175},{x:420,y:230}]],
+      'I': [[{x:212,y:115},{x:212,y:230}],[{x:185,y:115},{x:240,y:115}],[{x:185,y:230},{x:240,y:230}],[{x:400,y:155},{x:400,y:230}],[{x:400,y:120},{x:400,y:125}]],
+      'J': [[{x:195,y:115},{x:275,y:115}],[{x:235,y:115},{x:235,y:195},{x:205,y:230},{x:175,y:205}],[{x:415,y:155},{x:415,y:245},{x:395,y:268},{x:370,y:255}],[{x:415,y:120},{x:415,y:125}]],
+      'K': [[{x:175,y:115},{x:175,y:230}],[{x:245,y:115},{x:175,y:172}],[{x:185,y:165},{x:248,y:230}],[{x:375,y:115},{x:375,y:230}],[{x:420,y:160},{x:375,y:195}],[{x:390,y:185},{x:425,y:230}]],
+      'L': [[{x:185,y:115},{x:185,y:230},{x:245,y:230}],[{x:395,y:115},{x:395,y:230}]],
+      'M': [[{x:165,y:230},{x:165,y:115},{x:212,y:230},{x:260,y:115},{x:260,y:230}],[{x:365,y:160},{x:365,y:230}],[{x:365,y:180},{x:390,y:160},{x:400,y:180},{x:400,y:230}],[{x:400,y:180},{x:425,y:160},{x:435,y:180},{x:435,y:230}]],
+      'N': [[{x:175,y:230},{x:175,y:115},{x:250,y:230},{x:250,y:115}],[{x:375,y:160},{x:375,y:230}],[{x:375,y:180},{x:405,y:160},{x:425,y:180},{x:425,y:230}]],
+      'O': [
+        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
+        [{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}]
+      ],
+      'P': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:245,y:145},{x:235,y:172},{x:175,y:172}],[{x:375,y:160},{x:375,y:268}],[{x:375,y:165},{x:415,y:165},{x:425,y:195},{x:415,y:230},{x:375,y:230}]],
+      'Q': [
+        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
+        [{x:225,y:200},{x:265,y:240}],
+        [{x:420,y:165},{x:395,y:155},{x:375,y:195},{x:395,y:230},{x:420,y:220}],
+        [{x:420,y:160},{x:420,y:268}]
+      ],
+      'R': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:245,y:145},{x:235,y:172},{x:175,y:172}],[{x:210,y:172},{x:250,y:230}],[{x:380,y:160},{x:380,y:230}],[{x:380,y:180},{x:410,y:160},{x:425,y:175}]],
+      'S': [
+        [{x:245,y:135},{x:225,y:118},{x:195,y:122},{x:180,y:142},{x:195,y:165},{x:230,y:180},{x:245,y:202},{x:230,y:225},{x:195,y:228},{x:175,y:212}],
+        [{x:420,y:170},{x:408,y:158},{x:388,y:160},{x:378,y:175},{x:388,y:190},{x:412,y:200},{x:422,y:215},{x:410,y:228},{x:388,y:228},{x:375,y:215}]
+      ],
+      'T': [[{x:170,y:115},{x:255,y:115}],[{x:212,y:115},{x:212,y:230}],[{x:395,y:115},{x:395,y:230}],[{x:370,y:160},{x:420,y:160}]],
+      'U': [
+        [{x:175,y:115},{x:175,y:185},{x:185,y:215},{x:212,y:230},{x:240,y:215},{x:250,y:185},{x:250,y:115}],
+        [{x:375,y:160},{x:375,y:205},{x:388,y:228},{x:407,y:228},{x:420,y:205},{x:420,y:160}],
+        [{x:420,y:160},{x:420,y:230}]
+      ],
+      'V': [
+        [{x:165,y:115},{x:212,y:230},{x:260,y:115}],
+        [{x:370,y:160},{x:398,y:230},{x:425,y:160}]
+      ],
+      'W': [[{x:160,y:115},{x:185,y:230},{x:212,y:150},{x:240,y:230},{x:265,y:115}],[{x:360,y:160},{x:375,y:230},{x:395,y:180},{x:415,y:230},{x:430,y:160}]],
+      'X': [[{x:170,y:115},{x:255,y:230}],[{x:255,y:115},{x:170,y:230}],[{x:375,y:160},{x:425,y:230}],[{x:425,y:160},{x:375,y:230}]],
+      'Y': [
+        [{x:165,y:115},{x:212,y:172}],
+        [{x:260,y:115},{x:212,y:172}],
+        [{x:212,y:172},{x:212,y:230}],
+        [{x:370,y:160},{x:398,y:230}],
+        [{x:425,y:160},{x:390,y:268},{x:370,y:258}]
+      ],
+      'Z': [[{x:170,y:115},{x:255,y:115},{x:170,y:230},{x:255,y:230}],[{x:375,y:160},{x:425,y:160},{x:375,y:230},{x:425,y:230}]],
+      'Å': [
+        [{x:220,y:115},{x:168,y:230}],
+        [{x:220,y:115},{x:272,y:230}],
+        [{x:186,y:190},{x:254,y:190}],
+        createCirclePath(220, 78, 18),
+        createSmallAPath(398, 192, 23, 30),
+        [{x:421,y:155},{x:421,y:230}],
+        createCirclePath(400, 125, 15)
+      ],
+      'Ä': [
+        [{x:220,y:115},{x:168,y:230}],
+        [{x:220,y:115},{x:272,y:230}],
+        [{x:186,y:190},{x:254,y:190}],
+        [{x:200,y:80},{x:201,y:81}],
+        [{x:240,y:80},{x:241,y:81}],
+        createSmallAPath(398, 192, 23, 30),
+        [{x:421,y:155},{x:421,y:230}],
+        [{x:385,y:125},{x:386,y:126}],
+        [{x:415,y:125},{x:416,y:126}]
+      ],
+      'Ö': [
+        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
+        [{x:195,y:80},{x:196,y:81}],
+        [{x:230,y:80},{x:231,y:81}],
+        [{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}],
+        [{x:385,y:125},{x:386,y:126}],
+        [{x:415,y:125},{x:416,y:126}]
+      ]
+    };
+
+    alphabet.forEach((letter, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'letter-btn' + (index === 0 ? ' active' : '');
+      btn.innerText = letter;
+      btn.addEventListener('click', () => { stopAnimation(); selectLetter(index); });
+      grid.appendChild(btn);
+    });
+
+    function selectLetter(index) {
+      currentLetterIndex = index;
+      document.querySelectorAll('.letter-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+      drawTemplate();
+    }
+
+    function drawTemplate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.strokeStyle = '#dcdde1';
+      ctx.lineWidth = 2;
+      [60, 150, 240].forEach(y => {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      });
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(0, 105); ctx.lineTo(canvas.width, 105); ctx.stroke();
+      ctx.setLineDash([]);
+
+      const letter = alphabet[currentLetterIndex];
+      const strokes = strokeGuide[letter];
+
+      if (strokes) {
+        ctx.strokeStyle = '#b2bec3';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.setLineDash([8, 8]);
+
+        strokes.forEach(stroke => {
+          if (stroke.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(stroke[0].x, stroke[0].y);
+            for (let i = 1; i < stroke.length; i++) {
+              ctx.lineTo(stroke[i].x, stroke[i].y);
+            }
+            ctx.stroke();
+          }
+        });
+        ctx.setLineDash([]);
+      }
+    }
+
+    function animateTracing() {
+      if (isAnimating) return;
+      const letter = alphabet[currentLetterIndex];
+      const strokes = strokeGuide[letter];
+
+      if (!strokes) return;
+
+      isAnimating = true;
+      demoBtn.disabled = true;
+      drawTemplate();
+
+      let strokeIdx = 0;
+      let pointIdx = 0;
+      let currentDistance = 0;
+      const completedStrokes = [];
+
+      function renderFrame() {
+        if (!isAnimating) return;
+        drawTemplate();
+
+        const speed = parseFloat(speedSlider.value);
+
+        ctx.strokeStyle = '#2ecc71';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        completedStrokes.forEach(stroke => {
+          ctx.beginPath();
+          ctx.moveTo(stroke[0].x, stroke[0].y);
+          for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+          ctx.stroke();
+        });
+
+        const currentStroke = strokes[strokeIdx];
+        const p1 = currentStroke[pointIdx];
+        const p2 = currentStroke[pointIdx + 1] || p1;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const segmentLength = Math.hypot(dx, dy);
+
+        currentDistance += speed;
+
+        let currX, currY;
+        if (segmentLength === 0 || currentDistance >= segmentLength) {
+          currX = p2.x;
+          currY = p2.y;
+        } else {
+          const ratio = currentDistance / segmentLength;
+          currX = p1.x + dx * ratio;
+          currY = p1.y + dy * ratio;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(currentStroke[0].x, currentStroke[0].y);
+        for (let i = 1; i <= pointIdx; i++) ctx.lineTo(currentStroke[i].x, currentStroke[i].y);
+        ctx.lineTo(currX, currY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(currX, currY, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (currentDistance >= segmentLength) {
+          currentDistance = 0;
+          pointIdx++;
+
+          if (pointIdx >= currentStroke.length - 1) {
+            completedStrokes.push(currentStroke);
+            strokeIdx++;
+            pointIdx = 0;
+            if (strokeIdx < strokes.length) {
+              setTimeout(() => { if (isAnimating) animationFrameId = requestAnimationFrame(renderFrame); }, 250);
+              return;
+            }
+          }
+        }
+
+        if (strokeIdx < strokes.length) {
+          animationFrameId = requestAnimationFrame(renderFrame);
+        } else {
+          setTimeout(() => {
+            drawTemplate();
+            ctx.strokeStyle = '#2ecc71';
+            ctx.lineWidth = 14;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            completedStrokes.forEach(stroke => {
+              ctx.beginPath();
+              ctx.moveTo(stroke[0].x, stroke[0].y);
+              for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+              ctx.stroke();
+            });
+            isAnimating = false;
+            demoBtn.disabled = false;
+          }, 150);
+        }
+      }
+      renderFrame();
+    }
+
+    function stopAnimation() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      isAnimating = false;
+      demoBtn.disabled = false;
+      drawTemplate();
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDrawing(e) {
+      if (isAnimating) stopAnimation();
+      isDrawing = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = '#2c3e50';
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    function stopDrawing() { isDrawing = false; }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+    canvas.addEventListener('touchend', stopDrawing);
+
+    demoBtn.addEventListener('click', animateTracing);
+    clearBtn.addEventListener('click', () => { stopAnimation(); drawTemplate(); });
+    nextBtn.addEventListener('click', () => {
+      stopAnimation();
+      selectLetter((currentLetterIndex + 1) % alphabet.length);
+    });
+
+    drawTemplate();
+  </script>
+</body>
+</html>
