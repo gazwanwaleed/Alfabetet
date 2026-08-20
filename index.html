@@ -6,31 +6,37 @@
   <title>Träna på bokstäver</title>
   <style>
     * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
-    body { margin: 0; padding: 15px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; }
-    h1 { color: #2c3e50; margin: 0 0 10px 0; font-size: 1.8rem; }
-    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 800px; margin-bottom: 15px; }
-    .letter-btn { width: 42px; height: 42px; font-size: 1.2rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    body { margin: 0; padding: 10px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: space-between; }
+    h1 { color: #2c3e50; margin: 5px 0; font-size: 1.6rem; text-align: center; }
+    
+    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 700px; margin-bottom: 10px; }
+    .letter-btn { width: 38px; height: 38px; font-size: 1.1rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .letter-btn.active { background-color: #3498db; color: white; }
-    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; margin-bottom: 15px; }
-    canvas { display: block; border-radius: 9px; }
-    .controls { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
-    .btn { padding: 10px 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+    
+    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; margin-bottom: 10px; width: 100%; max-width: 600px; aspect-ratio: 2 / 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    canvas { display: block; width: 100%; height: 100%; border-radius: 9px; }
+    
+    .controls { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .btn { padding: 8px 14px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
     .demo-btn { background-color: #9b59b6; }
     .clear-btn { background-color: #e74c3c; }
-    .next-btn { background-color: #2ecc71; font-size: 1rem; }
+    .fs-btn { background-color: #34495e; }
+    .next-btn { background-color: #2ecc71; font-size: 0.95rem; }
     .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
     
-    .speed-control { display: flex; align-items: center; gap: 6px; background-color: white; border: 2px solid #bdc3c7; border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; font-weight: bold; color: #2c3e50; }
-    .speed-control input[type=range] { width: 80px; cursor: pointer; }
+    .speed-control { display: flex; align-items: center; gap: 4px; background-color: white; border: 2px solid #bdc3c7; border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; color: #2c3e50; }
+    .speed-control input[type=range] { width: 70px; cursor: pointer; }
   </style>
 </head>
 <body>
 
   <h1>Forma bokstäver</h1>
   <div class="alphabet-grid" id="alphabetGrid"></div>
-  <div class="canvas-container">
+  
+  <div class="canvas-container" id="canvasContainer">
     <canvas id="paintCanvas" width="600" height="300"></canvas>
   </div>
+
   <div class="controls">
     <button class="btn demo-btn" id="demoBtn" title="Visa hur man ritar">👁️</button>
     <div class="speed-control">
@@ -39,7 +45,8 @@
       <span>🐇</span>
     </div>
     <button class="btn clear-btn" id="clearBtn" title="Rensa">🗑️</button>
-    <button class="btn next-btn" id="nextBtn">Nästa bokstav ➔</button>
+    <button class="btn fs-btn" id="fsBtn" title="Helskärm">📺</button>
+    <button class="btn next-btn" id="nextBtn">Nästa ➔</button>
   </div>
 
   <script>
@@ -48,10 +55,12 @@
 
     const grid = document.getElementById('alphabetGrid');
     const canvas = document.getElementById('paintCanvas');
+    const canvasContainer = document.getElementById('canvasContainer');
     const ctx = canvas.getContext('2d');
     const clearBtn = document.getElementById('clearBtn');
     const nextBtn = document.getElementById('nextBtn');
     const demoBtn = document.getElementById('demoBtn');
+    const fsBtn = document.getElementById('fsBtn');
     const speedSlider = document.getElementById('speedSlider');
 
     let isDrawing = false;
@@ -62,10 +71,7 @@
       const points = [];
       for (let i = 0; i <= numPoints; i++) {
         const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
-        points.push({
-          x: cx + r * Math.cos(angle),
-          y: cy + r * Math.sin(angle)
-        });
+        points.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
       }
       return points;
     }
@@ -75,39 +81,19 @@
       const numPoints = 20;
       for (let i = 0; i <= numPoints; i++) {
         const angle = -Math.PI * 0.3 - (i / numPoints) * Math.PI * 1.8;
-        points.push({
-          x: cx + rx * Math.cos(angle),
-          y: cy + ry * Math.sin(angle)
-        });
+        points.push({ x: cx + rx * Math.cos(angle), y: cy + ry * Math.sin(angle) });
       }
       return points;
     }
 
     const strokeGuide = {
-      'A': [
-        [{x:220,y:115},{x:168,y:230}],
-        [{x:220,y:115},{x:272,y:230}],
-        [{x:186,y:190},{x:254,y:190}],
-        createSmallAPath(398, 192, 23, 30),
-        [{x:421,y:155},{x:421,y:230}]
-      ],
+      'A': [[{x:220,y:115},{x:168,y:230}],[{x:220,y:115},{x:272,y:230}],[{x:186,y:190},{x:254,y:190}],createSmallAPath(398, 192, 23, 30),[{x:421,y:155},{x:421,y:230}]],
       'B': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:225,y:115},{x:240,y:140},{x:225,y:165},{x:175,y:165}],[{x:175,y:165},{x:230,y:165},{x:245,y:195},{x:230,y:230},{x:175,y:230}],[{x:375,y:115},{x:375,y:230}],[{x:375,y:165},{x:415,y:165},{x:425,y:195},{x:415,y:230},{x:375,y:230}]],
-      'C': [
-        [{x:250,y:135},{x:225,y:118},{x:192,y:128},{x:170,y:172},{x:192,y:216},{x:225,y:226},{x:250,y:210}],
-        [{x:420,y:175},{x:405,y:160},{x:385,y:168},{x:375,y:192},{x:385,y:218},{x:405,y:225},{x:420,y:210}]
-      ],
+      'C': [[{x:250,y:135},{x:225,y:118},{x:192,y:128},{x:170,y:172},{x:192,y:216},{x:225,y:226},{x:250,y:210}],[{x:420,y:175},{x:405,y:160},{x:385,y:168},{x:375,y:192},{x:385,y:218},{x:405,y:225},{x:420,y:210}]],
       'D': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:255,y:172},{x:235,y:230},{x:175,y:230}],[{x:422,y:115},{x:422,y:230}],[{x:422,y:160},{x:395,y:155},{x:375,y:175},{x:375,y:205},{x:395,y:230},{x:422,y:220}]],
       'E': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],[{x:175,y:230},{x:245,y:230}],[{x:375,y:192},{x:420,y:192},{x:420,y:170},{x:398,y:155},{x:375,y:175},{x:375,y:208},{x:400,y:230},{x:425,y:215}]],
-      'F': [
-        [{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],
-        [{x:380,y:230},{x:380,y:135},{x:395,y:115},{x:420,y:125}],
-        [{x:365,y:172},{x:405,y:172}]
-      ],
-      'G': [
-        [{x:250,y:135},{x:215,y:115},{x:180,y:135},{x:165,y:172},{x:180,y:210},{x:215,y:230},{x:250,y:215},{x:250,y:172},{x:215,y:172}],
-        [{x:420,y:165},{x:398,y:155},{x:375,y:175},{x:375,y:208},{x:398,y:228},{x:420,y:215}],
-        [{x:420,y:155},{x:420,y:250},{x:405,y:268},{x:380,y:260}]
-      ],
+      'F': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],[{x:380,y:230},{x:380,y:135},{x:395,y:115},{x:420,y:125}],[{x:365,y:172},{x:405,y:172}]],
+      'G': [[{x:250,y:135},{x:215,y:115},{x:180,y:135},{x:165,y:172},{x:180,y:210},{x:215,y:230},{x:250,y:215},{x:250,y:172},{x:215,y:172}],[{x:420,y:165},{x:398,y:155},{x:375,y:175},{x:375,y:208},{x:398,y:228},{x:420,y:215}],[{x:420,y:155},{x:420,y:250},{x:405,y:268},{x:380,y:260}]],
       'H': [[{x:175,y:115},{x:175,y:230}],[{x:250,y:115},{x:250,y:230}],[{x:175,y:172},{x:250,y:172}],[{x:375,y:115},{x:375,y:230}],[{x:375,y:175},{x:400,y:160},{x:420,y:175},{x:420,y:230}]],
       'I': [[{x:212,y:115},{x:212,y:230}],[{x:185,y:115},{x:240,y:115}],[{x:185,y:230},{x:240,y:230}],[{x:400,y:155},{x:400,y:230}],[{x:400,y:120},{x:400,y:125}]],
       'J': [[{x:195,y:115},{x:275,y:115}],[{x:235,y:115},{x:235,y:195},{x:205,y:230},{x:175,y:205}],[{x:415,y:155},{x:415,y:245},{x:395,y:268},{x:370,y:255}],[{x:415,y:120},{x:415,y:125}]],
@@ -115,70 +101,21 @@
       'L': [[{x:185,y:115},{x:185,y:230},{x:245,y:230}],[{x:395,y:115},{x:395,y:230}]],
       'M': [[{x:165,y:230},{x:165,y:115},{x:212,y:230},{x:260,y:115},{x:260,y:230}],[{x:365,y:160},{x:365,y:230}],[{x:365,y:180},{x:390,y:160},{x:400,y:180},{x:400,y:230}],[{x:400,y:180},{x:425,y:160},{x:435,y:180},{x:435,y:230}]],
       'N': [[{x:175,y:230},{x:175,y:115},{x:250,y:230},{x:250,y:115}],[{x:375,y:160},{x:375,y:230}],[{x:375,y:180},{x:405,y:160},{x:425,y:180},{x:425,y:230}]],
-      'O': [
-        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
-        [{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}]
-      ],
+      'O': [[{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],[{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}]],
       'P': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:245,y:145},{x:235,y:172},{x:175,y:172}],[{x:375,y:160},{x:375,y:268}],[{x:375,y:165},{x:415,y:165},{x:425,y:195},{x:415,y:230},{x:375,y:230}]],
-      'Q': [
-        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
-        [{x:225,y:200},{x:265,y:240}],
-        [{x:420,y:165},{x:395,y:155},{x:375,y:195},{x:395,y:230},{x:420,y:220}],
-        [{x:420,y:160},{x:420,y:268}]
-      ],
+      'Q': [[{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],[{x:225,y:200},{x:265,y:240}],[{x:420,y:165},{x:395,y:155},{x:375,y:195},{x:395,y:230},{x:420,y:220}],[{x:420,y:160},{x:420,y:268}]],
       'R': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:235,y:115},{x:245,y:145},{x:235,y:172},{x:175,y:172}],[{x:210,y:172},{x:250,y:230}],[{x:380,y:160},{x:380,y:230}],[{x:380,y:180},{x:410,y:160},{x:425,y:175}]],
-      'S': [
-        [{x:245,y:135},{x:225,y:118},{x:195,y:122},{x:180,y:142},{x:195,y:165},{x:230,y:180},{x:245,y:202},{x:230,y:225},{x:195,y:228},{x:175,y:212}],
-        [{x:420,y:170},{x:408,y:158},{x:388,y:160},{x:378,y:175},{x:388,y:190},{x:412,y:200},{x:422,y:215},{x:410,y:228},{x:388,y:228},{x:375,y:215}]
-      ],
+      'S': [[{x:245,y:135},{x:225,y:118},{x:195,y:122},{x:180,y:142},{x:195,y:165},{x:230,y:180},{x:245,y:202},{x:230,y:225},{x:195,y:228},{x:175,y:212}],[{x:420,y:170},{x:408,y:158},{x:388,y:160},{x:378,y:175},{x:388,y:190},{x:412,y:200},{x:422,y:215},{x:410,y:228},{x:388,y:228},{x:375,y:215}]],
       'T': [[{x:170,y:115},{x:255,y:115}],[{x:212,y:115},{x:212,y:230}],[{x:395,y:115},{x:395,y:230}],[{x:370,y:160},{x:420,y:160}]],
-      'U': [
-        [{x:175,y:115},{x:175,y:185},{x:185,y:215},{x:212,y:230},{x:240,y:215},{x:250,y:185},{x:250,y:115}],
-        [{x:375,y:160},{x:375,y:205},{x:388,y:228},{x:407,y:228},{x:420,y:205},{x:420,y:160}],
-        [{x:420,y:160},{x:420,y:230}]
-      ],
-      'V': [
-        [{x:165,y:115},{x:212,y:230},{x:260,y:115}],
-        [{x:370,y:160},{x:398,y:230},{x:425,y:160}]
-      ],
+      'U': [[{x:175,y:115},{x:175,y:185},{x:185,y:215},{x:212,y:230},{x:240,y:215},{x:250,y:185},{x:250,y:115}],[{x:375,y:160},{x:375,y:205},{x:388,y:228},{x:407,y:228},{x:420,y:205},{x:420,y:160}],[{x:420,y:160},{x:420,y:230}]],
+      'V': [[{x:165,y:115},{x:212,y:230},{x:260,y:115}],[{x:370,y:160},{x:398,y:230},{x:425,y:160}]],
       'W': [[{x:160,y:115},{x:185,y:230},{x:212,y:150},{x:240,y:230},{x:265,y:115}],[{x:360,y:160},{x:375,y:230},{x:395,y:180},{x:415,y:230},{x:430,y:160}]],
       'X': [[{x:170,y:115},{x:255,y:230}],[{x:255,y:115},{x:170,y:230}],[{x:375,y:160},{x:425,y:230}],[{x:425,y:160},{x:375,y:230}]],
-      'Y': [
-        [{x:165,y:115},{x:212,y:172}],
-        [{x:260,y:115},{x:212,y:172}],
-        [{x:212,y:172},{x:212,y:230}],
-        [{x:370,y:160},{x:398,y:230}],
-        [{x:425,y:160},{x:390,y:268},{x:370,y:258}]
-      ],
+      'Y': [[{x:165,y:115},{x:212,y:172}],[{x:260,y:115},{x:212,y:172}],[{x:212,y:172},{x:212,y:230}],[{x:370,y:160},{x:398,y:230}],[{x:425,y:160},{x:390,y:268},{x:370,y:258}]],
       'Z': [[{x:170,y:115},{x:255,y:115},{x:170,y:230},{x:255,y:230}],[{x:375,y:160},{x:425,y:160},{x:375,y:230},{x:425,y:230}]],
-      'Å': [
-        [{x:220,y:115},{x:168,y:230}],
-        [{x:220,y:115},{x:272,y:230}],
-        [{x:186,y:190},{x:254,y:190}],
-        createCirclePath(220, 78, 18),
-        createSmallAPath(398, 192, 23, 30),
-        [{x:421,y:155},{x:421,y:230}],
-        createCirclePath(400, 125, 15)
-      ],
-      'Ä': [
-        [{x:220,y:115},{x:168,y:230}],
-        [{x:220,y:115},{x:272,y:230}],
-        [{x:186,y:190},{x:254,y:190}],
-        [{x:200,y:80},{x:201,y:81}],
-        [{x:240,y:80},{x:241,y:81}],
-        createSmallAPath(398, 192, 23, 30),
-        [{x:421,y:155},{x:421,y:230}],
-        [{x:385,y:125},{x:386,y:126}],
-        [{x:415,y:125},{x:416,y:126}]
-      ],
-      'Ö': [
-        [{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],
-        [{x:195,y:80},{x:196,y:81}],
-        [{x:230,y:80},{x:231,y:81}],
-        [{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}],
-        [{x:385,y:125},{x:386,y:126}],
-        [{x:415,y:125},{x:416,y:126}]
-      ]
+      'Å': [[{x:220,y:115},{x:168,y:230}],[{x:220,y:115},{x:272,y:230}],[{x:186,y:190},{x:254,y:190}],createCirclePath(220, 78, 18),createSmallAPath(398, 192, 23, 30),[{x:421,y:155},{x:421,y:230}],createCirclePath(400, 125, 15)],
+      'Ä': [[{x:220,y:115},{x:168,y:230}],[{x:220,y:115},{x:272,y:230}],[{x:186,y:190},{x:254,y:190}],[{x:200,y:80},{x:201,y:81}],[{x:240,y:80},{x:241,y:81}],createSmallAPath(398, 192, 23, 30),[{x:421,y:155},{x:421,y:230}],[{x:385,y:125},{x:386,y:126}],[{x:415,y:125},{x:416,y:126}]],
+      'Ö': [[{x:212,y:115},{x:180,y:128},{x:165,y:172},{x:180,y:216},{x:212,y:230},{x:244,y:216},{x:260,y:172},{x:244,y:128},{x:212,y:115}],[{x:195,y:80},{x:196,y:81}],[{x:230,y:80},{x:231,y:81}],[{x:400,y:155},{x:378,y:165},{x:370,y:192},{x:378,y:220},{x:400,y:230},{x:422,y:220},{x:430,y:192},{x:422,y:165},{x:400,y:155}],[{x:385,y:125},{x:386,y:126}],[{x:415,y:125},{x:416,y:126}]]
     };
 
     alphabet.forEach((letter, index) => {
@@ -345,7 +282,13 @@
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
+      // Beräkna koordinater baserat på den faktiska skalan på canvasen
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return { 
+        x: (clientX - rect.left) * scaleX, 
+        y: (clientY - rect.top) * scaleY 
+      };
     }
 
     function startDrawing(e) {
@@ -375,6 +318,17 @@
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
     canvas.addEventListener('touchend', stopDrawing);
+
+    // Helskärmsfunktion
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        canvasContainer.requestFullscreen().catch(err => {
+          alert(`Kunde inte aktivera helskärm: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    });
 
     demoBtn.addEventListener('click', animateTracing);
     clearBtn.addEventListener('click', () => { stopAnimation(); drawTemplate(); });
