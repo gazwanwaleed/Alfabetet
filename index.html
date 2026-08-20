@@ -20,7 +20,6 @@
     .controls { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
     .btn { padding: 8px 14px; font-size: 1.05rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
     
-    /* Stil för bilderna i knapparna så de håller rätt storlek */
     .btn img {
       width: 26px;
       height: 26px;
@@ -333,13 +332,24 @@
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
     canvas.addEventListener('touchend', stopDrawing);
 
-    fsBtn.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-          alert(`Kunde inte aktivera helskärm: ${err.message}`);
-        });
-      } else {
-        document.exitFullscreen();
+    fsBtn.addEventListener('click', async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+          // Försök tvinga skärmen till liggande läge (landscape) när helskärm aktiveras
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('landscape').catch(() => {});
+          }
+        } else {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          }
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        }
+      } catch (err) {
+        console.log(`Helskärm/Rotering kunde inte aktiveras: ${err.message}`);
       }
     });
 
