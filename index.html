@@ -6,26 +6,19 @@
   <title>Träna på bokstäver</title>
   <style>
     * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
-    body { margin: 0; padding: 10px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: space-between; }
+    body { margin: 0; padding: 10px; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; gap: 8px; }
     
-    /* Anpassning när hela sidan är i helskärm */
-    :fullscreen body, :-webkit-full-screen body {
-      background-color: #f0f8ff;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    h1 { color: #2c3e50; margin: 5px 0; font-size: 1.6rem; text-align: center; }
+    h1 { color: #2c3e50; margin: 0; font-size: 1.5rem; text-align: center; }
     
-    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 700px; margin-bottom: 10px; }
-    .letter-btn { width: 38px; height: 38px; font-size: 1.1rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 680px; }
+    .letter-btn { width: 36px; height: 36px; font-size: 1.05rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .letter-btn.active { background-color: #3498db; color: white; }
     
-    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; margin-bottom: 10px; width: 100%; max-width: 600px; aspect-ratio: 2 / 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; width: 100%; max-width: 580px; aspect-ratio: 2 / 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     canvas { display: block; width: 100%; height: 100%; border-radius: 9px; }
     
-    .controls { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-    .btn { padding: 8px 14px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+    .controls { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 8px 14px; font-size: 1.05rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
     .demo-btn { background-color: #9b59b6; }
     .clear-btn { background-color: #e74c3c; }
     .fs-btn { background-color: #34495e; }
@@ -33,7 +26,7 @@
     .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
     
     .speed-control { display: flex; align-items: center; gap: 4px; background-color: white; border: 2px solid #bdc3c7; border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; color: #2c3e50; }
-    .speed-control input[type=range] { width: 70px; cursor: pointer; }
+    .speed-control input[type=range] { width: 65px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -53,7 +46,7 @@
       <span>🐇</span>
     </div>
     <button class="btn clear-btn" id="clearBtn" title="Rensa">🗑️</button>
-    <button class="btn fs-btn" id="fsBtn" title="Helskärm">📺</button>
+    <button class="btn fs-btn" id="fsBtn" title="Helskärm">🗖</button>
     <button class="btn next-btn" id="nextBtn">Nästa ➔</button>
   </div>
 
@@ -325,7 +318,6 @@
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
     canvas.addEventListener('touchend', stopDrawing);
 
-    // Helskärmsfunktion för hela dokumentet
     fsBtn.addEventListener('click', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
