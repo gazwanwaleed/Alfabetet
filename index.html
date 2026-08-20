@@ -11,8 +11,10 @@
     h1 { color: #2c3e50; margin: 0; font-size: 1.5rem; text-align: center; }
     
     .alphabet-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 680px; }
-    .letter-btn { width: 36px; height: 36px; font-size: 1.05rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .letter-btn, .fs-btn { width: 36px; height: 36px; font-size: 1.05rem; font-weight: bold; background-color: #fff; border: 2px solid #3498db; border-radius: 8px; color: #2c3e50; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
     .letter-btn.active { background-color: #3498db; color: white; }
+    .fs-btn { border-color: #2c3e50; background-color: #fff; }
+    .fs-btn img { width: 22px; height: 22px; object-fit: contain; display: block; }
     
     .canvas-container { position: relative; background: white; border: 3px solid #2c3e50; border-radius: 12px; width: 100%; max-width: 580px; aspect-ratio: 2 / 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     canvas { display: block; width: 100%; height: 100%; border-radius: 9px; }
@@ -29,7 +31,6 @@
 
     .demo-btn { background-color: #9b59b6; }
     .clear-btn { background-color: #e74c3c; }
-    .fs-btn { background-color: #34495e; color: white; font-size: 1.2rem; line-height: 1; padding: 8px 12px; }
     .next-btn { background-color: #2ecc71; }
     .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
     
@@ -58,7 +59,6 @@
     <button class="btn clear-btn" id="clearBtn" title="Rensa">
       <img src="eraser-stationery-clipart-md.png" alt="Rensa">
     </button>
-    <button class="btn fs-btn" id="fsBtn" title="Helskärm">🗖</button>
     <button class="btn next-btn" id="nextBtn" title="Nästa bokstav">
       <img src="189253.png" alt="Nästa">
     </button>
@@ -74,7 +74,6 @@
     const clearBtn = document.getElementById('clearBtn');
     const nextBtn = document.getElementById('nextBtn');
     const demoBtn = document.getElementById('demoBtn');
-    const fsBtn = document.getElementById('fsBtn');
     const speedSlider = document.getElementById('speedSlider');
 
     let isDrawing = false;
@@ -139,6 +138,16 @@
       btn.addEventListener('click', () => { stopAnimation(); selectLetter(index); });
       grid.appendChild(btn);
     });
+
+    // Skapa och lägg till helskärmsknappen efter bokstaven Ö i rutnätet
+    const fsBtn = document.createElement('button');
+    fsBtn.className = 'fs-btn';
+    fsBtn.title = 'Helskärm';
+    const fsImg = document.createElement('img');
+    fsImg.src = '—Pngtree—full screen line vector single_5184442.png';
+    fsImg.alt = 'Helskärm';
+    fsBtn.appendChild(fsImg);
+    grid.appendChild(fsBtn);
 
     function selectLetter(index) {
       currentLetterIndex = index;
@@ -336,7 +345,6 @@
       try {
         if (!document.fullscreenElement) {
           await document.documentElement.requestFullscreen();
-          // Försök tvinga skärmen till liggande läge (landscape) när helskärm aktiveras
           if (screen.orientation && screen.orientation.lock) {
             await screen.orientation.lock('landscape').catch(() => {});
           }
