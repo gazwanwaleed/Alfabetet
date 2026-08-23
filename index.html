@@ -87,6 +87,38 @@
       touch-action: none;
     }
 
+    /* Stil för högtalarknappen uppe till höger på ritytan */
+    .sound-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 5vh;
+      height: 5vh;
+      min-width: 40px;
+      min-height: 40px;
+      background-color: #f1c40f;
+      border: 2px solid #2c3e50;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 10;
+      padding: 0;
+    }
+
+    .sound-btn:active {
+      transform: scale(0.95);
+    }
+
+    .sound-btn img {
+      width: 2.8vh;
+      height: 2.8vh;
+      object-fit: contain;
+      display: block;
+    }
+
     canvas {
       display: block;
       width: 100%;
@@ -190,6 +222,10 @@
   <div class="alphabet-grid" id="alphabetGrid"></div>
   
   <div class="canvas-container" id="canvasContainer">
+    <!-- Högtalarknapp som använder speaker.png -->
+    <button class="sound-btn" id="soundBtn" title="Lyssna på bokstaven">
+      <img src="speaker.png" alt="Lyssna">
+    </button>
     <canvas id="paintCanvas" width="600" height="300"></canvas>
   </div>
 
@@ -221,10 +257,23 @@
     const nextBtn = document.getElementById('nextBtn');
     const demoBtn = document.getElementById('demoBtn');
     const speedSlider = document.getElementById('speedSlider');
+    const soundBtn = document.getElementById('soundBtn');
 
     let isDrawing = false;
     let isAnimating = false;
     let animationFrameId = null;
+
+    // Spela upp ljud från .mp4-filen som ligger i samma mapp
+    function playLetterSound() {
+      const letter = alphabet[currentLetterIndex];
+      const audio = new Audio(`${letter}.mp4`);
+      
+      audio.play().catch(err => {
+        console.log("Kunde inte spela upp ljudfilen:", err);
+      });
+    }
+
+    soundBtn.addEventListener('click', playLetterSound);
 
     function createCirclePath(cx, cy, r, numPoints = 24) {
       const points = [];
