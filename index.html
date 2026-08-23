@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Träna på bokstäver</title>
+  <title>Det svenska alfabetet </title>
   <style>
     * { box-sizing: border-box; touch-action: none; font-family: 'Chalkboard SE', 'Comic Sans MS', 'Fredoka', sans-serif; }
 
@@ -15,20 +15,20 @@
 
     body {
       margin: 0;
-      padding: 10px;
+      padding: 8px;
       background-color: #f0f8ff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      gap: 1.5vh;
+      gap: 1.2vh;
     }
     
     h1 {
       color: #2c3e50;
       margin: 0;
-      font-size: 3vh;
+      font-size: 2.8vh;
       text-align: center;
     }
     
@@ -36,16 +36,16 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 4px;
-      max-width: 90vw;
+      gap: 6px;
+      max-width: 98vw;
     }
 
     .letter-btn, .fs-btn {
-      width: 4.2vh;
-      height: 4.2vh;
-      min-width: 32px;
-      min-height: 32px;
-      font-size: 2vh;
+      width: 5vh;
+      height: 5vh;
+      min-width: 36px;
+      min-height: 36px;
+      font-size: 2.4vh;
       font-weight: bold;
       background-color: #fff;
       border: 2px solid #3498db;
@@ -69,8 +69,8 @@
     }
 
     .fs-btn img {
-      width: 2.2vh;
-      height: 2.2vh;
+      width: 2.6vh;
+      height: 2.6vh;
       object-fit: contain;
       display: block;
     }
@@ -80,22 +80,21 @@
       background: white;
       border: 3px solid #2c3e50;
       border-radius: 12px;
-      width: 82vw;
-      max-width: 950px;
-      aspect-ratio: 2 / 1;
+      width: 95vw;
+      max-width: 1350px;
+      aspect-ratio: 2.2 / 1;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       touch-action: none;
     }
 
-    /* Stil för högtalarknappen uppe till höger på ritytan */
     .sound-btn {
       position: absolute;
       top: 15px;
       right: 15px;
-      width: 5vh;
-      height: 5vh;
-      min-width: 40px;
-      min-height: 40px;
+      width: 5.5vh;
+      height: 5.5vh;
+      min-width: 42px;
+      min-height: 42px;
       background-color: #f1c40f;
       border: 2px solid #2c3e50;
       border-radius: 50%;
@@ -113,8 +112,8 @@
     }
 
     .sound-btn img {
-      width: 2.8vh;
-      height: 2.8vh;
+      width: 3vh;
+      height: 3vh;
       object-fit: contain;
       display: block;
     }
@@ -129,15 +128,15 @@
     
     .controls {
       display: flex;
-      gap: 1vw;
+      gap: 1.2vw;
       justify-content: center;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .btn {
-      padding: 1vh 1.5vw;
-      font-size: 2vh;
+      padding: 1.2vh 1.8vw;
+      font-size: 2.2vh;
       font-weight: bold;
       border: none;
       border-radius: 8px;
@@ -149,8 +148,8 @@
     }
     
     .btn img {
-      width: 3vh;
-      height: 3vh;
+      width: 3.2vh;
+      height: 3.2vh;
       object-fit: contain;
       display: block;
     }
@@ -163,66 +162,65 @@
     .speed-control {
       display: flex;
       align-items: center;
-      gap: 0.5vw;
+      gap: 0.6vw;
       background-color: white;
       border: 2px solid #bdc3c7;
       border-radius: 8px;
-      padding: 0.5vh 1vw;
-      font-size: 1.8vh;
+      padding: 0.8vh 1.2vw;
+      font-size: 2vh;
       font-weight: bold;
       color: #2c3e50;
     }
 
     .speed-control input[type=range] {
-      width: 8vw;
-      min-width: 60px;
+      width: 10vw;
+      min-width: 70px;
       cursor: pointer;
     }
 
     body:fullscreen {
       width: 100vw;
       height: 100vh;
-      padding: 2vh 2vw;
-      gap: 2vh;
+      padding: 1.5vh 2vw;
+      gap: 1.8vh;
     }
 
     body:fullscreen .canvas-container {
-      width: 90vw;
-      max-width: 1400px;
+      width: 96vw;
+      max-width: 1550px;
     }
 
     body:fullscreen h1 {
-      font-size: 4vh;
+      font-size: 3.5vh;
     }
 
     body:fullscreen .letter-btn, body:fullscreen .fs-btn {
-      width: 5.2vh;
-      height: 5.2vh;
-      font-size: 2.5vh;
+      width: 5.6vh;
+      height: 5.6vh;
+      font-size: 2.7vh;
     }
 
     body:fullscreen .fs-btn img {
-      width: 2.8vh;
-      height: 2.8vh;
+      width: 3vh;
+      height: 3vh;
     }
 
     body:fullscreen .btn {
-      font-size: 2.3vh;
+      font-size: 2.5vh;
     }
 
     body:fullscreen .btn img {
-      width: 3.5vh;
-      height: 3.5vh;
+      width: 3.8vh;
+      height: 3.8vh;
     }
   </style>
 </head>
 <body>
 
-  <h1>Forma bokstäver</h1>
+  <h1></h1>
   <div class="alphabet-grid" id="alphabetGrid"></div>
   
   <div class="canvas-container" id="canvasContainer">
-    <!-- Högtalarknapp som använder speaker.png -->
     <button class="sound-btn" id="soundBtn" title="Lyssna på bokstaven">
       <img src="speaker.png" alt="Lyssna">
     </button>
@@ -263,7 +261,6 @@
     let isAnimating = false;
     let animationFrameId = null;
 
-    // Spela upp ljud från .mp4-filen som ligger i samma mapp
     function playLetterSound() {
       const letter = alphabet[currentLetterIndex];
       const audio = new Audio(`${letter}.mp4`);
@@ -326,7 +323,7 @@
       'A': [[{x:165,y:230},{x:212,y:115}],[{x:212,y:115},{x:260,y:230}],[{x:185,y:185},{x:240,y:185}],createSmallAPath(398, 192, 23, 30),[{x:421,y:155},{x:421,y:230}]],
       'B': [[{x:175,y:115},{x:175,y:230}],createArcPath(175,140,65,25,0,180,16),createArcPath(175,197.5,70,32.5,0,180,16),[{x:375,y:115},{x:375,y:230}],createArcPath(375,197.5,50,32.5,0,180,16)],
       'C': [createArcPath(208,172,42,57,415,125,20),createArcPath(398,193,25,33,415,125,16)],
-      'D': [[{x:175,y:115},{x:175,y:230}],createArcPath(175,172.5,80,57.5,0,180,20),[{x:422,y:115},{x:422,y:230}],createArcPath(422,197.5,70,32.5,360,180,16)],
+      'D': [[{x:175,y:115},{x:175,y:230}],createArcPath(175,172.5,80,57.5,0,180,20),[{x:410,y:115},{x:410,y:230}],createArcPath(410,197.5,50,32.5,180,360,16)],
       'E': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],[{x:175,y:230},{x:245,y:230}],[{x:375,y:192},{x:420,y:192}].concat(createArcPath(397.5,192.5,22.5,37.5,90,-230,24).slice(1))],
       'F': [[{x:175,y:115},{x:175,y:230}],[{x:175,y:115},{x:245,y:115}],[{x:175,y:172},{x:235,y:172}],catmullRomSpline([{x:380,y:230},{x:380,y:135},{x:395,y:115},{x:420,y:125}],10),[{x:365,y:172},{x:405,y:172}]],
       'G': [createArcPath(207.5,172.5,42.5,57.5,50,-230,20).concat([{x:250,y:172},{x:215,y:172}]),createArcPath(397.5,191.5,22.5,36.5,40,-220,16),catmullRomSpline([{x:420,y:155},{x:420,y:250},{x:405,y:268},{x:380,y:260}],10)],
@@ -349,7 +346,12 @@
         catmullRomSpline([{x:365,y:190},{x:382,y:175},{x:400,y:190},{x:400,y:230}], 10),
         catmullRomSpline([{x:400,y:190},{x:417,y:175},{x:435,y:190},{x:435,y:230}], 10)
       ],
-      'N': [[{x:175,y:230},{x:175,y:115},{x:250,y:230},{x:250,y:115}],[{x:375,y:160},{x:375,y:230}],catmullRomSpline([{x:375,y:180},{x:405,y:160},{x:425,y:180},{x:425,y:230}],10)],
+      'N': [
+        [{x:175, y:115}, {x:175, y:230}], 
+        [{x:175, y:115}, {x:250, y:230}, {x:250, y:115}], 
+        [{x:375, y:160}, {x:375, y:230}], 
+        catmullRomSpline([{x:375, y:180}, {x:405, y:160}, {x:425, y:180}, {x:425, y:230}], 10)
+      ],
       'O': [createArcPath(212.5,172.5,47.5,57.5,0,360,28),createArcPath(400,192.5,30,37.5,0,360,24)],
       'P': [[{x:175,y:115},{x:175,y:230}],createArcPath(175,143.5,70,28.5,0,180,14),[{x:375,y:160},{x:375,y:268}],createArcPath(375,197.5,50,32.5,0,180,14)],
       'Q': [createArcPath(212.5,172.5,47.5,57.5,0,360,28),[{x:225,y:200},{x:265,y:240}],createArcPath(397.5,191.5,22.5,36.5,40,-220,16),[{x:420,y:160},{x:420,y:268}]],
